@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const videoSchema = new Schema(
+const videoSchema = new mongoose.Schema(
     {
         videoFile: {
             type: String,
@@ -11,8 +11,8 @@ const videoSchema = new Schema(
             required: true
         },
         owner: {
-            type: Schema.Type.objecId,
-            ref: User
+            type: mongoose.Schema.Types.objecId,
+            ref: "User"
         },
         title: {
             type: String,
