@@ -5,16 +5,6 @@ const User = require("../models/user.model.js");
 const uploadOnCloudinary = require("../utils/cloudinary.js");
 
 const registerUser = asyncHandler(async (req, res) => {
-  // first will take data from users
-  // validation -  not  empty
-  // already existed user - username, email
-  // check for image
-  // check for avatar
-  // sent to cloudinary
-  // creat user object
-  // remove passowrd and refersh token form response
-  // check for user creation
-  // return res
 
   const { username, email, fullName, password } = req.body;
   if (
@@ -31,26 +21,24 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User is already existed with this email");
   }
 
-  console.log(req.files);
-
   const avatarLocalPath = req.files?.avatar[0]?.path;
-
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
-
+  let coverImageLocalPath;
+  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+      coverImageLocalPath = req.files.coverImage[0].path
+  }
+ 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-  console.log(avatar);
-
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required");
   }
 
-  const user = User.create({
+  const user = await User.create({
     fullName,
     email,
     password,
@@ -62,6 +50,8 @@ const registerUser = asyncHandler(async (req, res) => {
   const createdUser = await User.findById(user._id).select(
     "-password -refereshToken"
   )
+
+  console.log(createdUser);
 
   if(!createdUser){
     throw new ApiError(500, "Something went wrong while registering the user");
